@@ -7,6 +7,9 @@ app.use(cors({
   origin: "https://chesska.vercel.app"
 }));
 app.use(express.json());
+app.get('/', (req, res) => {
+  res.send('✅ Backend is running');
+});
 
 app.post('/analyse-position', (req, res) => {
   const { fen } = req.body;
