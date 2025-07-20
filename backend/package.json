@@ -1,16 +1,20 @@
 {
-  "name": "ai-chess-analyser",
+  "name": "chess-analyser-backend",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "engines": {
+    "node": "20.x"
+  },
   "dependencies": {
     "cors": "^2.8.5",
-    "express": "^5.1.0"
+    "express": "^4.19.2"
   }
 }
+
