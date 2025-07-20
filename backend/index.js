@@ -15,25 +15,34 @@ app.post('/analyse-position', (req,res)=>{
   }
   const stockfishProcess = spawn('./stockfish');
   let bestMove = null;
+  let score = null;
+
 
 
   stockfishProcess.stdout.on('data', (data)=>{
     const output = data.toString();
+    console.log(`Stockfish Output: ${output}`);
 
+    if(output.includes('info score cp')) {
+      const scoreMatch = output.match(/score cp (-?\d+)/);
+      if(scoreMatch) {
+        score = (parseInt(scoreMatch[1], 10)/100).toFixed(2);
+      }
+    }
     if(output.includes('bestmove')){
       const match = output.match(/bestmove\s+(\S+)/);
       if(match) {
         bestMove= match[1];
       }
     }
-  })
+});
   stockfishProcess.stderr.on('data', (data) => {
     console.error(`Stockfish Error: ${data}`);
   });
 
   stockfishProcess.on('close',()=>{
     if(bestMove){
-        res.json({best_move : bestMove});
+        res.json({best_move : bestMove, score: score});
     } else {
         res.status(500).json({error: 'Could not determine best move'});
     }
@@ -49,5 +58,5 @@ app.post('/analyse-position', (req,res)=>{
 });
 
 app.listen(PORT, () => {
-  console.log(`Server is running on https://localhost:${PORT}`);
+  console.log(`Server is running on http://localhost:${PORT}`);
 });

@@ -1,5 +1,5 @@
 {
-  "name": "chess-analyser-backend",
+  "name": "ai-chess-analyser",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
