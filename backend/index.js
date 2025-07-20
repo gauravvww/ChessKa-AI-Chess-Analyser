@@ -64,8 +64,13 @@ app.post('/analyse-position', (req, res) => {
   });
 
   stockfishProcess.stdin.write(`position fen ${fen}\n`);
-  
-  stockfishProcess.stdin.write('go depth 4\n'); //this depth might be roughly my level lol
+  // --- CHANGE: Switched back to movetime for a fast, predictable response ---
+  stockfishProcess.stdin.write('go movetime 1000\n');
+
+  // --- CHANGE: Re-added setTimeout to quit the process ---
+  setTimeout(() => {
+    stockfishProcess.stdin.write('quit\n');
+  }, 1500);
 });
 
 app.listen(PORT, () => {
