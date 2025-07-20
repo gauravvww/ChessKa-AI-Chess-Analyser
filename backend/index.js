@@ -1,80 +1,54 @@
 const express = require('express');
 const cors = require('cors');
 const { spawn } = require('child_process');
-const path = require('path');
-const fs = require('fs');
-
-const stockfishPath = path.join(__dirname, 'stockfish');
-try {
-  fs.chmodSync(stockfishPath, 0o755);
-} catch (e) {
-  console.error(`Could not set permissions for Stockfish: ${e}`);
-}
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-
-const corsOptions = {
-  origin: 'https://chesska.vercel.app',
-  optionsSuccessStatus: 200 
-};
-app.use(cors(corsOptions));
-
+app.use(cors());
 app.use(express.json());
 
 app.post('/analyse-position', (req, res) => {
-  const fen = req.body.fen;
+  const { fen } = req.body;
+  if (!fen) return res.status(400).json({ error: 'FEN is required' });
 
-  if (!fen) {
-    return res.status(400).json({ error: 'FEN string is required' });
-  }
+  console.log("\uD83D\uDD25 Received FEN:", fen);
 
-  const stockfishProcess = spawn(stockfishPath);
+  const stockfish = spawn('stockfish');
+  stockfish.stdin.write(`position fen ${fen}\n`);
+  stockfish.stdin.write('go depth 15\n');
+
   let bestMove = null;
-  let score = null;
+  let evalScore = null;
 
-  stockfishProcess.stdout.on('data', (data) => {
-    const output = data.toString();
-
-    if (output.includes('info score cp')) {
-      const scoreMatch = output.match(/score cp (-?\d+)/);
-      if (scoreMatch) {
-        score = (parseInt(scoreMatch[1], 10) / 100).toFixed(2);
+  stockfish.stdout.on('data', (data) => {
+    const lines = data.toString().split('\n');
+    lines.forEach((line) => {
+      if (line.startsWith('info') && line.includes('score')) {
+        const match = line.match(/score (cp|mate) (-?\d+)/);
+        if (match) {
+          evalScore = match[1] === 'cp' ? `${match[2]} centipawns` : `mate in ${match[2]}`;
+        }
       }
-    }
+      if (line.startsWith('bestmove')) {
+        bestMove = line.split(' ')[1];
+        console.log("\uD83D\uDD25 Sending best move:", bestMove);
+        console.log("\uD83D\uDD25 Sending score:", evalScore);
 
-    
-    if (output.includes('bestmove')) {
-      const match = output.match(/bestmove\s+(\S+)/);
-      if (match) {
-        bestMove = match[1];
+        stockfish.kill();
+        res.json({ best_move: bestMove, score: evalScore });
       }
-     
-      stockfishProcess.stdin.write('quit\n');
-    }
+    });
   });
 
-  stockfishProcess.stderr.on('data', (data) => {
-    console.error(`Stockfish Error: ${data}`);
+  stockfish.stderr.on('data', (data) => {
+    console.error(`Stockfish error: ${data}`);
   });
 
-  stockfishProcess.on('close', () => {
-    if (bestMove) {
-      res.json({ best_move: bestMove, score: score });
-    } else {
-      res.status(500).json({ error: 'Could not determine best move' });
-    }
+  stockfish.on('exit', (code) => {
+    console.log(`Stockfish exited with code ${code}`);
   });
-
-  stockfishProcess.stdin.write(`position fen ${fen}\n`);
- 
-  stockfishProcess.stdin.write('go movetime 2500\n');
-
- 
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port: ${PORT}`);
-});
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`\uD83C\uDF0D Server running on port ${PORT}`));
 
 
