@@ -3,66 +3,63 @@ import { Chess } from 'chess.js';
 import { Chessboard } from 'react-chessboard';
 
 function App() {
-  const [game, setGame] = useState(new Chess());
-  const [fen, setFen] = useState(game.fen());
+  const [fen, setFen] = useState('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
+  const [fenInput, setFenInput] = useState('');
   const [analysis, setAnalysis] = useState({ move: null, score: null });
 
-  const onDrop = (sourceSquare, targetSquare) => {
-    const gameCopy = new Chess(game.fen());
-    
-    try {
-      const move = gameCopy.move({
-        from: sourceSquare,
-        to: targetSquare,
-        promotion: 'q'
-      });
-
-      if (move) {
-        setGame(gameCopy);
-        setFen(gameCopy.fen());
-        return true;
+  const handleLoadFen = () => {
+    if (fenInput.trim()) {
+      try {
+        // Validate FEN
+        new Chess(fenInput.trim());
+        setFen(fenInput.trim());
+        setAnalysis({ move: null, score: null });
+      } catch {
+        alert('Invalid FEN');
       }
-    } catch (error) {
-      return error.message.includes('Illegal move') ? false : true;
     }
-    
-    return false;
   };
 
   const handleAnalyze = async () => {
-    const response = await fetch('https://chesska.onrender.com/analyse-position', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fen: game.fen() }),
-    });
+    try {
+      const response = await fetch('https://chesska.onrender.com/analyse-position', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fen: fen }),
+      });
 
-    const data = await response.json();
-    if (data.best_move) {
-      const from = data.best_move.slice(0, 2);
-      const to = data.best_move.slice(2, 4);
-
-      const newGame = new Chess(game.fen());
-      newGame.move({ from, to });
-
-      setGame(newGame);
-      setFen(newGame.fen());
+      const data = await response.json();
       setAnalysis({ move: data.best_move, score: data.score });
+    } catch {
+      alert('Analysis failed');
     }
   };
 
   return (
     <div>
-      <h1>Chess Analyzer</h1>
-      <Chessboard 
-        position={fen} 
-        onPieceDrop={onDrop}
-        arePiecesDraggable={true} 
-      />
-      <button onClick={handleAnalyze}>Analyze</button>
+      <h1>Chess Position Analyzer</h1>
+      
+      <div>
+        <input 
+          type="text" 
+          placeholder="Enter FEN string"
+          value={fenInput}
+          onChange={(e) => setFenInput(e.target.value)}
+          style={{ width: '500px', marginRight: '10px' }}
+        />
+        <button onClick={handleLoadFen}>Load Position</button>
+      </div>
+      
+      <div style={{ margin: '20px 0' }}>
+        <Chessboard position={fen} arePiecesDraggable={false} />
+      </div>
+      
+      <button onClick={handleAnalyze}>Analyze Position</button>
+      
       {analysis.move && (
-        <div>
-          <p>Best Move: {analysis.move}</p>
-          <p>Score: {analysis.score}</p>
+        <div style={{ marginTop: '20px' }}>
+          <p><strong>Best Move:</strong> {analysis.move}</p>
+          <p><strong>Evaluation:</strong> {analysis.score}</p>
         </div>
       )}
     </div>
