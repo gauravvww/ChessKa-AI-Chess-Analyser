@@ -1,11 +1,9 @@
 const express = require('express');
 const cors = require('cors');
 const { spawn } = require('child_process');
-// --- CHANGE: Import built-in modules for handling file paths and permissions ---
 const path = require('path');
 const fs = require('fs');
 
-// --- CHANGE: Create a reliable path to Stockfish and set execute permissions for servers ---
 const stockfishPath = path.join(__dirname, 'stockfish');
 try {
   fs.chmodSync(stockfishPath, 0o755);
@@ -14,10 +12,16 @@ try {
 }
 
 const app = express();
-// --- CHANGE: Use the port provided by the hosting service (Render), or 3000 locally ---
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
+// --- CHANGE: Configure CORS to allow your frontend's domain ---
+const corsOptions = {
+  origin: 'https://chesska.vercel.app',
+  optionsSuccessStatus: 200 
+};
+app.use(cors(corsOptions));
+// --- END CHANGE ---
+
 app.use(express.json());
 
 app.post('/analyse-position', (req, res) => {
@@ -27,7 +31,6 @@ app.post('/analyse-position', (req, res) => {
     return res.status(400).json({ error: 'FEN string is required' });
   }
 
-  // --- CHANGE: Use the dynamic path variable to start Stockfish ---
   const stockfishProcess = spawn(stockfishPath);
   let bestMove = null;
   let score = null;
