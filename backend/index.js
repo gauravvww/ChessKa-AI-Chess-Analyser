@@ -1,60 +1,60 @@
 const express = require('express');
-const {spawn} = require('child_process');
+const cors = require('cors');
+const { spawn } = require('child_process');
 
 const app = express();
 const PORT = 3000;
 
-app.use(express.json());
 app.use(cors());
+app.use(express.json());
 
-app.post('/analyse-position', (req,res)=>{
-   
+app.post('/analyse-position', (req, res) => {
   const fen = req.body.fen;
-  if(!fen){
-    return res.status(400).json({error: 'FEN string is required'});
+
+  if (!fen) {
+    return res.status(400).json({ error: 'FEN string is required' });
   }
+
   const stockfishProcess = spawn('./stockfish');
   let bestMove = null;
   let score = null;
 
-
-
-  stockfishProcess.stdout.on('data', (data)=>{
+  stockfishProcess.stdout.on('data', (data) => {
     const output = data.toString();
-    console.log(`Stockfish Output: ${output}`);
 
-    if(output.includes('info score cp')) {
+    if (output.includes('info score cp')) {
       const scoreMatch = output.match(/score cp (-?\d+)/);
-      if(scoreMatch) {
-        score = (parseInt(scoreMatch[1], 10)/100).toFixed(2);
+      if (scoreMatch) {
+        score = (parseInt(scoreMatch[1], 10) / 100).toFixed(2);
       }
     }
-    if(output.includes('bestmove')){
+
+    if (output.includes('bestmove')) {
       const match = output.match(/bestmove\s+(\S+)/);
-      if(match) {
-        bestMove= match[1];
+      if (match) {
+        bestMove = match[1];
       }
     }
-});
+  });
+
   stockfishProcess.stderr.on('data', (data) => {
     console.error(`Stockfish Error: ${data}`);
   });
 
-  stockfishProcess.on('close',()=>{
-    if(bestMove){
-        res.json({best_move : bestMove, score: score});
+  stockfishProcess.on('close', () => {
+    if (bestMove) {
+      res.json({ best_move: bestMove, score: score });
     } else {
-        res.status(500).json({error: 'Could not determine best move'});
+      res.status(500).json({ error: 'Could not determine best move' });
     }
   });
 
   stockfishProcess.stdin.write(`position fen ${fen}\n`);
   stockfishProcess.stdin.write('go movetime 1000\n');
 
-    setTimeout(() => {
-      stockfishProcess.stdin.write('quit\n');
-    }, 1500);
-
+  setTimeout(() => {
+    stockfishProcess.stdin.write('quit\n');
+  }, 1500);
 });
 
 app.listen(PORT, () => {

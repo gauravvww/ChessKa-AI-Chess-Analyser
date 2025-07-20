@@ -1,0 +1,137 @@
+/* General App Styling */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  background-color: #f0f2f5; /* Light grey background */
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+h1 {
+  color: #1c1e21; /* Darker text for better contrast */
+  margin-bottom: 2rem;
+  font-weight: 700;
+}
+
+/* Main content layout */
+.main-content {
+  display: flex;
+  flex-direction: column; /* Stacks on mobile */
+  align-items: center;
+  gap: 2rem;
+  width: 100%;
+}
+
+/* Board styling */
+.board-container {
+  width: 100%;
+  max-width: 450px; /* Controls max size */
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden; /* Ensures shadow respects border radius */
+}
+
+/* Right panel for controls and analysis */
+.right-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 450px; /* Matches board width on mobile */
+}
+
+/* Controls card styling */
+.controls {
+  background-color: #ffffff;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.controls label {
+  font-weight: 500;
+  color: #333;
+}
+
+.fen-input {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  box-sizing: border-box;
+  border: 1px solid #dddfe2;
+  border-radius: 6px;
+  transition: border-color 0.2s;
+}
+
+.fen-input:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+button {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+/* Analysis result card styling */
+.analysis-result {
+  background-color: #ffffff;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.analysis-result h4 {
+  margin: 0 0 1rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #eee;
+  color: #333;
+}
+
+.analysis-result p {
+  margin: 0.25rem 0;
+  font-size: 1rem;
+  color: #333;
+}
+
+/* Responsive layout for larger screens */
+@media (min-width: 900px) {
+  .main-content {
+    flex-direction: row; /* Side-by-side layout */
+    align-items: flex-start;
+    max-width: 1000px;
+  }
+
+  .board-container {
+    flex: 1; /* Takes up available space */
+    max-width: 500px;
+  }
+
+  .right-panel {
+    flex-basis: 400px; /* Fixed width for the right column */
+    max-width: 400px;
+  }
+}
