@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Chessboard } from 'react-chessboard';
 import { Chess } from 'chess.js';
-import './App.css';
+import { Chessboard } from 'react-chessboard';
 
 function App() {
   const [game, setGame] = useState(new Chess());
@@ -9,53 +8,35 @@ function App() {
   const [analysis, setAnalysis] = useState({ move: null, score: null });
 
   const handleAnalyze = async () => {
-    const currentFen = game.fen();
-    setFen(currentFen);
-    console.log('🔍 FEN sent to backend:', currentFen);
+    const response = await fetch('https://chesska.onrender.com/analyse-position', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fen: game.fen() }),
+    });
 
-    try {
-      const response = await fetch('https://chesska.onrender.com/analyse-position', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ fen: currentFen }),
-      });
+    const data = await response.json();
+    if (data.best_move) {
+      const from = data.best_move.slice(0, 2);
+      const to = data.best_move.slice(2, 4);
 
-      const data = await response.json();
-      console.log('✅ Backend response:', data);
+      const newGame = new Chess(game.fen());
+      newGame.move({ from, to });
 
-      const bestMove = data.best_move;
-      const score = data.score;
-
-      if (bestMove) {
-        // Make the move on the board
-        game.move({
-          from: bestMove.slice(0, 2),
-          to: bestMove.slice(2, 4),
-        });
-
-        // Update the board and state
-        setFen(game.fen());
-        setGame(new Chess(game.fen()));
-        setAnalysis({ move: bestMove, score });
-      }
-    } catch (error) {
-      console.error('❌ Error analyzing position:', error);
+      setGame(newGame);
+      setFen(newGame.fen());
+      setAnalysis({ move: data.best_move, score: data.score });
     }
   };
 
   return (
-    <div className="App">
-      <h2>♟️ Chess Position Analyzer</h2>
-      <Chessboard position={fen} />
-      <button onClick={handleAnalyze} style={{ marginTop: '16px' }}>
-        Analyze Position
-      </button>
+    <div>
+      <h1>Chess Analyzer</h1>
+      <Chessboard position={fen} arePiecesDraggable={false} />
+      <button onClick={handleAnalyze}>Analyze</button>
       {analysis.move && (
-        <div style={{ marginTop: '12px' }}>
-          <p><strong>Best Move:</strong> {analysis.move}</p>
-          <p><strong>Evaluation:</strong> {analysis.score}</p>
+        <div>
+          <p>Best Move: {analysis.move}</p>
+          <p>Score: {analysis.score}</p>
         </div>
       )}
     </div>
