@@ -31,6 +31,7 @@ h1 {
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   overflow: hidden; /* Ensures shadow respects border radius */
+  border: 2px solid red; /* Temporary red border for debugging */
 }
 
 /* Right panel for controls and analysis */
