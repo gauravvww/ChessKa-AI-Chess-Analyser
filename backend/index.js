@@ -14,13 +14,13 @@ try {
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// --- CHANGE: Configure CORS to allow your frontend's domain ---
+
 const corsOptions = {
   origin: 'https://chesska.vercel.app',
   optionsSuccessStatus: 200 
 };
 app.use(cors(corsOptions));
-// --- END CHANGE ---
+
 
 app.use(express.json());
 
@@ -66,11 +66,11 @@ app.post('/analyse-position', (req, res) => {
   });
 
   stockfishProcess.stdin.write(`position fen ${fen}\n`);
-  stockfishProcess.stdin.write('go movetime 1000\n');
+  stockfishProcess.stdin.write('go movetime 3000\n');
 
   setTimeout(() => {
     stockfishProcess.stdin.write('quit\n');
-  }, 1500);
+  }, 3500);
 });
 
 app.listen(PORT, () => {
