@@ -49,7 +49,7 @@ function App() {
 
   return (
     <div className="app-container">
-      <h1>AI Chess Position Analyser</h1>
+      <h1>ChessKa - AI Chess Position Analyser</h1>
       <div className="main-content">
         <div className="board-container">
           
