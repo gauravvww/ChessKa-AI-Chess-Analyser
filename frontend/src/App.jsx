@@ -20,10 +20,11 @@ function App() {
         return;
       }
       
+      // --- FIX: Use the 'cleanedFen' to update the board state ---
       setGame(new Chess(cleanedFen));
       setAnalysis({ move: 'Analyzing...', score: null });
 
-     const response = await fetch('https://chesska.onrender.com/analyse-position', {
+      const response = await fetch('https://chesska.onrender.com/analyse-position', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -43,15 +44,13 @@ function App() {
     }
   };
 
-    return (
+  return (
     <div className="app-container">
-      <h1>ChessKa - AI Chess Position Analyser</h1>
+      <h1>AI Chess Position Analyser</h1>
       <div className="main-content">
         <div className="board-container">
           <Chessboard position={game.fen()} />
         </div>
-        
-        {/* New wrapper div for the right panel */}
         <div className="right-panel">
           <div className="controls">
             <label>Enter FEN String: </label>
@@ -73,7 +72,6 @@ function App() {
       </div>
     </div>
   );
-
 }
 
 export default App;

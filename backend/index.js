@@ -14,13 +14,11 @@ try {
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-
 const corsOptions = {
   origin: 'https://chesska.vercel.app',
   optionsSuccessStatus: 200 
 };
 app.use(cors(corsOptions));
-
 
 app.use(express.json());
 
@@ -66,11 +64,8 @@ app.post('/analyse-position', (req, res) => {
   });
 
   stockfishProcess.stdin.write(`position fen ${fen}\n`);
-  stockfishProcess.stdin.write('go movetime 3000\n');
-
-  setTimeout(() => {
-    stockfishProcess.stdin.write('quit\n');
-  }, 3500);
+  
+  stockfishProcess.stdin.write('go depth 10\n');
 });
 
 app.listen(PORT, () => {
