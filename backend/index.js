@@ -64,13 +64,13 @@ app.post('/analyse-position', (req, res) => {
   });
 
   stockfishProcess.stdin.write(`position fen ${fen}\n`);
-  // --- CHANGE: Switched back to movetime for a fast, predictable response ---
-  stockfishProcess.stdin.write('go movetime 1000\n');
+ 
+  stockfishProcess.stdin.write('go movetime 2000\n');
 
-  // --- CHANGE: Re-added setTimeout to quit the process ---
+  
   setTimeout(() => {
     stockfishProcess.stdin.write('quit\n');
-  }, 1500);
+  }, 2500);
 });
 
 app.listen(PORT, () => {

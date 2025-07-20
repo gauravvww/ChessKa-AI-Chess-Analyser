@@ -4,13 +4,16 @@ import { Chess } from 'chess.js';
 import './App.css';
 
 function App() {
-  const [game, setGame] = useState(new Chess());
-  const [fen, setFen] = useState(game.fen());
+  
+  const [boardPosition, setBoardPosition] = useState(new Chess().fen());
+  
+  const [fenInput, setFenInput] = useState(new Chess().fen());
+  
   const [analysis, setAnalysis] = useState({ move: null, score: null });
 
   const handleAnalyse = async () => {
     try {
-      const cleanedFen = fen.trim().replace(/\s+/g, ' ');
+      const cleanedFen = fenInput.trim().replace(/\s+/g, ' ');
 
       const tempGame = new Chess();
       const isValidFen = tempGame.load(cleanedFen);
@@ -20,8 +23,8 @@ function App() {
         return;
       }
       
-      // --- FIX: Use the 'cleanedFen' to update the board state ---
-      setGame(new Chess(cleanedFen));
+      
+      setBoardPosition(cleanedFen);
       setAnalysis({ move: 'Analyzing...', score: null });
 
       const response = await fetch('https://chesska.onrender.com/analyse-position', {
@@ -46,18 +49,20 @@ function App() {
 
   return (
     <div className="app-container">
-      <h1>AI Chess Position Analyser</h1>
+      <h1> ChessKa - AI Chess Position Analyser</h1>
       <div className="main-content">
         <div className="board-container">
-          <Chessboard position={game.fen()} />
+          
+          <Chessboard position={boardPosition} />
         </div>
         <div className="right-panel">
           <div className="controls">
             <label>Enter FEN String: </label>
             <input
               type="text"
-              value={fen}
-              onChange={(e) => setFen(e.target.value)}
+             
+              value={fenInput}
+              onChange={(e) => setFenInput(e.target.value)}
               className="fen-input" 
             />
             <button onClick={handleAnalyse}>Analyse Position</button>     
