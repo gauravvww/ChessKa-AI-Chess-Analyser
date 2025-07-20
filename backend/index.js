@@ -65,7 +65,7 @@ app.post('/analyse-position', (req, res) => {
 
   stockfishProcess.stdin.write(`position fen ${fen}\n`);
   
-  stockfishProcess.stdin.write('go depth 10\n');
+  stockfishProcess.stdin.write('go depth 4\n'); //this depth might be roughly my level lol
 });
 
 app.listen(PORT, () => {
