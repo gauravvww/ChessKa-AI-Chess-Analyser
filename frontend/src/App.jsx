@@ -23,7 +23,7 @@ function App() {
       setGame(new Chess(cleanedFen));
       setAnalysis({ move: 'Analyzing...', score: null });
 
-      const response = await fetch('http://localhost:3000/analyse-position', {
+     const response = await fetch('https://chesska.onrender.com/analyse-position', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
