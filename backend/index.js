@@ -43,11 +43,14 @@ app.post('/analyse-position', (req, res) => {
       }
     }
 
+    
     if (output.includes('bestmove')) {
       const match = output.match(/bestmove\s+(\S+)/);
       if (match) {
         bestMove = match[1];
       }
+     
+      stockfishProcess.stdin.write('quit\n');
     }
   });
 
@@ -65,13 +68,15 @@ app.post('/analyse-position', (req, res) => {
 
   stockfishProcess.stdin.write(`position fen ${fen}\n`);
  
-  stockfishProcess.stdin.write('go movetime 2000\n');
+  stockfishProcess.stdin.write('go movetime 2500\n');
 
-  
-  setTimeout(() => {
-    stockfishProcess.stdin.write('quit\n');
-  }, 2500);
+ 
 });
+
+app.listen(PORT, () => {
+  console.log(`Server is running on port: ${PORT}`);
+});
+
 
 app.listen(PORT, () => {
   console.log(`Server is running on port: ${PORT}`);

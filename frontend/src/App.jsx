@@ -4,12 +4,11 @@ import { Chess } from 'chess.js';
 import './App.css';
 
 function App() {
-  
   const [boardPosition, setBoardPosition] = useState(new Chess().fen());
-  
   const [fenInput, setFenInput] = useState(new Chess().fen());
-  
   const [analysis, setAnalysis] = useState({ move: null, score: null });
+  
+  const [boardKey, setBoardKey] = useState(0);
 
   const handleAnalyse = async () => {
     try {
@@ -23,7 +22,8 @@ function App() {
         return;
       }
       
-      
+     
+      setBoardKey(prevKey => prevKey + 1);
       setBoardPosition(cleanedFen);
       setAnalysis({ move: 'Analyzing...', score: null });
 
@@ -49,18 +49,17 @@ function App() {
 
   return (
     <div className="app-container">
-      <h1> ChessKa - AI Chess Position Analyser</h1>
+      <h1>AI Chess Position Analyser</h1>
       <div className="main-content">
         <div className="board-container">
           
-          <Chessboard position={boardPosition} />
+          <Chessboard key={boardKey} position={boardPosition} />
         </div>
         <div className="right-panel">
           <div className="controls">
             <label>Enter FEN String: </label>
             <input
               type="text"
-             
               value={fenInput}
               onChange={(e) => setFenInput(e.target.value)}
               className="fen-input" 
