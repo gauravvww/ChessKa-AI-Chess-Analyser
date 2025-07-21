@@ -32,7 +32,7 @@ function App() {
       console.log('DEBUG (Frontend): Board position updated to:', cleanedFen);
       setAnalysis({ move: 'Analyzing...', score: null });
 
-      const response = await fetch('http://localhost:3000/analyse-position', {
+      const response = await fetch('https://chesska-ai-chess-analyser-production.up.railway.app/analyse-position', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
