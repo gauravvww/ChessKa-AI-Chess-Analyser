@@ -13,21 +13,26 @@ function App() {
   const handleAnalyse = async () => {
     try {
       const cleanedFen = fenInput.trim().replace(/\s+/g, ' ');
+      console.log('DEBUG (Frontend): FEN input received:', fenInput);
+      console.log('DEBUG (Frontend): Cleaned FEN:', cleanedFen);
 
       const tempGame = new Chess();
       const isValidFen = tempGame.load(cleanedFen);
+      console.log('DEBUG (Frontend): Is FEN valid from chess.js?', isValidFen);
 
       if (!isValidFen) {
         setAnalysis({ move: 'Error: Invalid FEN string', score: null });
+        console.log('DEBUG (Frontend): FEN is invalid, stopping analysis.');
         return;
       }
       
       // --- FIX: Update the key and position to guarantee a re-render ---
       setBoardKey(prevKey => prevKey + 1);
       setBoardPosition(cleanedFen);
+      console.log('DEBUG (Frontend): Board position updated to:', cleanedFen);
       setAnalysis({ move: 'Analyzing...', score: null });
 
-      const response = await fetch('https://chesska-ai-chess-analyser-production.up.railway.app/analyse-position', {
+      const response = await fetch('http://localhost:3000/analyse-position', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -39,6 +44,7 @@ function App() {
         throw new Error('Network response was not ok');
       }
       const data = await response.json();
+      console.log('DEBUG (Frontend): Analysis data received:', data);
       setAnalysis({ move: data.best_move, score: data.score });
     }
     catch (error) {
@@ -71,6 +77,7 @@ function App() {
             {analysis.move && <p><strong>Best Move:</strong> {analysis.move}</p>}
             {analysis.score && <p><strong>Evaluation:</strong> {analysis.score}</p>}
             {!analysis.move && <p>Analysis will appear here.</p>}
+            <p>Current Board FEN State: {boardPosition}</p> 
           </div>
         </div>
       </div>
