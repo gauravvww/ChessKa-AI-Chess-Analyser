@@ -10,6 +10,43 @@ function App() {
   // --- FIX: Add a 'key' state to force the board to re-render ---
   const [boardKey, setBoardKey] = useState(0);
 
+  const onDrop = (sourceSquare, targetSquare, piece) => {
+
+    const tempGame = new Chess(boardPosition);
+    try{
+      const move = tempGame.move({
+        //this returns the move object   as well as modifies the game state V IMP detail
+        from: sourceSquare, 
+        to: targetSquare,
+        promotion: 'q' ,
+    });
+
+
+    if(move){
+      const newFen = tempGame.fen();
+      setBoardPosition(newFen);
+      setFenInput(newFen);
+      setBoardKey(prevKey => prevKey + 1); // Update key to force re-render
+      console.log(`DEBUG (Frontend): Move made from ${sourceSquare} to ${targetSquare}. New FEN: ${newFen}`);
+      setAnalysis({move: null, score: null}); // clear previous analysis when board changes
+      return true;
+      //react-chessboard docs : If onPieceDrop returns true, the move is accepted and the piece animates to the target square.
+    // if it returns false, the move is rejected and the piece snaps back to its original square.
+    }}
+
+catch(e){
+  console.error('DEBUG (Frontend): Illegal move attempted: ', e);
+  return false;
+
+}
+return false;
+  }
+
+
+
+
+
+
   const handleAnalyse = async () => {
     try {
       const cleanedFen = fenInput.trim().replace(/\s+/g, ' ');
@@ -25,10 +62,11 @@ function App() {
         console.log('DEBUG (Frontend): FEN is invalid, stopping analysis.');
         return;
       }
-      
+     
+      setBoardPosition(cleanedFen);
       // --- FIX: Update the key and position to guarantee a re-render ---
       setBoardKey(prevKey => prevKey + 1);
-      setBoardPosition(cleanedFen);
+      
       console.log('DEBUG (Frontend): Board position updated to:', cleanedFen);
       setAnalysis({ move: 'Analyzing...', score: null });
 
@@ -59,7 +97,11 @@ function App() {
       <div className="main-content">
         <div className="board-container">
           {/* --- FIX: Pass the 'key' prop to the Chessboard --- */}
-          <Chessboard key={boardKey} position={boardPosition} />
+          <Chessboard 
+          key={boardKey}
+           position={boardPosition}
+           onPieceDrop = {onDrop}
+           />
         </div>
         <div className="right-panel">
           <div className="controls">
