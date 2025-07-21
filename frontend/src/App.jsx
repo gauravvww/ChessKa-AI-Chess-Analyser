@@ -27,7 +27,7 @@ function App() {
       setBoardPosition(cleanedFen);
       setAnalysis({ move: 'Analyzing...', score: null });
 
-      const response = await fetch('https://chesska.onrender.com/analyse-position', {
+      const response = await fetch('https://chesska-ai-chess-analyser-production.up.railway.app/analyse-position', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
