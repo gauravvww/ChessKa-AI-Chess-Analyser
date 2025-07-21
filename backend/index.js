@@ -4,19 +4,20 @@ const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 
-const stockfishPath = path.join(__dirname, 'stockfish');
-try {
-  fs.chmodSync(stockfishPath, 0o755);
-} catch (e) {
-  console.error(`Could not set permissions for Stockfish: ${e}`);
-}
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const stockfishPath = path.join(__dirname, 'stockfish');
+
+try {
+  fs.chmodSync(stockfishPath, 0o755);
+} catch (e) {
+  console.error(`Could not set permissions for Stockfish: ${e.message}`);
+}
+
 const corsOptions = {
   origin: 'https://chesska.vercel.app',
-  optionsSuccessStatus: 200 
+  optionsSuccessStatus: 200
 };
 app.use(cors(corsOptions));
 
@@ -32,45 +33,45 @@ app.post('/analyse-position', (req, res) => {
   const stockfishProcess = spawn(stockfishPath);
   let bestMove = null;
   let score = null;
+  let errorOccurred = false;
 
   stockfishProcess.stdout.on('data', (data) => {
     const output = data.toString();
 
-    if (output.includes('info score cp')) {
-      const scoreMatch = output.match(/score cp (-?\d+)/);
-      if (scoreMatch) {
-        score = (parseInt(scoreMatch[1], 10) / 100).toFixed(2);
-      }
+    const scoreMatch = output.match(/score cp (-?\d+)/);
+    if (scoreMatch) {
+      score = (parseInt(scoreMatch[1], 10) / 100).toFixed(2);
     }
 
-   
-    if (output.includes('bestmove')) {
-      const match = output.match(/bestmove\s+(\S+)/);
-      if (match) {
-        bestMove = match[1];
-      }
-     
-      stockfishProcess.stdin.write('quit\n');
+    const bestMoveMatch = output.match(/bestmove\s+(\S+)/);
+    if (bestMoveMatch) {
+      bestMove = bestMoveMatch[1];
     }
   });
 
   stockfishProcess.stderr.on('data', (data) => {
-    console.error(`Stockfish Error: ${data}`);
+    errorOccurred = true;
   });
 
-  stockfishProcess.on('close', () => {
-    if (bestMove) {
-      res.json({ best_move: bestMove, score: score });
+  stockfishProcess.on('close', (code) => {
+    if (errorOccurred || !bestMove) {
+      res.status(500).json({ error: 'Could not determine best move or an error occurred during analysis.' });
     } else {
-      res.status(500).json({ error: 'Could not determine best move' });
+      res.json({ best_move: bestMove, score: score });
     }
   });
 
-  stockfishProcess.stdin.write(`position fen ${fen}\n`);
- 
-  stockfishProcess.stdin.write('go movetime 2500\n');
+  stockfishProcess.on('error', (err) => {
+    errorOccurred = true;
+    if (!res.headersSent) {
+      res.status(500).json({ error: `Failed to start Stockfish: ${err.message}` });
+    }
+  });
 
- 
+  stockfishProcess.stdin.write('uci\n');
+  stockfishProcess.stdin.write('isready\n');
+  stockfishProcess.stdin.write(`position fen ${fen}\n`);
+  stockfishProcess.stdin.write('go movetime 3000\n');
 });
 
 app.listen(PORT, () => {
