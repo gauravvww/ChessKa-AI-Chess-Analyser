@@ -25,7 +25,7 @@ try {
 
 // CORS configuration - allow requests from your local frontend (Vite's default)
 const corsOptions = {
-  origin: 'https://chesska.vercel.app/', // IMPORTANT: This must match your local frontend URL
+  origin: 'https://chesska.vercel.app', // IMPORTANT: This must match your local frontend URL
   optionsSuccessStatus: 200
 };
 app.use(cors(corsOptions));
