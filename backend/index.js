@@ -5,6 +5,8 @@ const path = require('path');
 const fs = require('fs');
 
 const app = express();
+console.log(`DEBUG: process.env.PORT from Render is: ${process.env.PORT}`);
+
 const PORT = process.env.PORT || 3000;
 
 const stockfishPath = path.join(__dirname, 'stockfish');
