@@ -15,25 +15,25 @@ const PORT = process.env.PORT || 3000; // Use 3000 locally if PORT env var is no
 const stockfishPath = path.join(__dirname, 'stockfish');
 
 // Attempt to set executable permissions for Stockfish
-// This is crucial for Linux deployments and good practice locally
+
 try {
-  fs.chmodSync(stockfishPath, 0o755);
+  fs.chmodSync(stockfishPath, 0o755); //"Change Mode Synchronously". It changes the file permissions of the file at stockfishPath.
   console.log('Stockfish permissions set to 0o755');
 } catch (e) {
   console.error(`Could not set permissions for Stockfish: ${e.message}`);
 }
 
-// CORS configuration - allow requests from your local frontend (Vite's default)
+
 const corsOptions = {
-  origin: 'https://chesska.vercel.app', // IMPORTANT: This must match your local frontend URL
+  origin: 'https://chesska.vercel.app', 
   optionsSuccessStatus: 200
 };
 app.use(cors(corsOptions));
 
-// Middleware to parse JSON request bodies
+
 app.use(express.json());
 
-// API endpoint for chess position analysis
+
 app.post('/analyse-position', (req, res) => {
   const fen = req.body.fen;
 
